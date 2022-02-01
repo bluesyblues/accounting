@@ -54,7 +54,7 @@ def send_query(database, query_str):
     return result
 
 
-def get_raw_data(database, accounting_date):
+def get_import_data(database, accounting_date):
     query_str = f"""
         SELECT
             CD.CD_TEXT,
@@ -87,5 +87,51 @@ def get_raw_data(database, accounting_date):
         else:
             query_result[i][0] = "NULL"
 
+    return query_result
+
+
+def get_expense_cash_data(database, accounting_date):
+    query_str = f"""
+    SELECT
+        FO.FO_OUT_DATE,
+        CD.CD_TEXT,
+        FO.FO_AMOUNT,
+        FO.FO_COMMENT
+    FROM (
+        SELECT 
+            FO_OUT_DATE,
+            FO_ACCOUNT,
+            FO_AMOUNT,
+            FO_COMMENT
+        FROM FINANCE_EXPENSE as fe 
+        WHERE fo_out_date = '{accounting_date}' AND FO_COMMENT LIKE  '현금%'
+    ) AS FO
+    JOIN CHRIST_CODE AS CD
+    ON FO.FO_ACCOUNT = CD.CD_SEQ
+    """
+    query_result = send_query(database, query_str)
+    return query_result
+
+
+def get_expense_bank_data(database, accounting_date):
+    query_str = f"""
+    SELECT
+        FO.FO_OUT_DATE,
+        CD.CD_TEXT,
+        FO.FO_AMOUNT,
+        FO.FO_COMMENT
+    FROM (
+        SELECT 
+            FO_OUT_DATE,
+            FO_ACCOUNT,
+            FO_AMOUNT,
+            FO_COMMENT
+        FROM FINANCE_EXPENSE as fe 
+        WHERE fo_out_date = '{accounting_date}' AND NOT FO_COMMENT LIKE  '현금%'
+    ) AS FO
+    JOIN CHRIST_CODE AS CD
+    ON FO.FO_ACCOUNT = CD.CD_SEQ
+    """
+    query_result = send_query(database, query_str)
     return query_result
 
