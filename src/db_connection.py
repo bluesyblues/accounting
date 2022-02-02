@@ -106,7 +106,7 @@ def get_expense_cash_data(database, accounting_date):
         FROM FINANCE_EXPENSE as fe 
         WHERE fo_out_date = '{accounting_date}' AND FO_COMMENT LIKE  '현금%'
     ) AS FO
-    JOIN CHRIST_CODE AS CD
+    LEFT JOIN CHRIST_CODE AS CD
     ON FO.FO_ACCOUNT = CD.CD_SEQ
     """
     query_result = send_query(database, query_str)
@@ -127,9 +127,9 @@ def get_expense_bank_data(database, accounting_date):
             FO_AMOUNT,
             FO_COMMENT
         FROM FINANCE_EXPENSE as fe 
-        WHERE fo_out_date = '{accounting_date}' AND NOT FO_COMMENT LIKE  '현금%'
+        WHERE fo_out_date = '{accounting_date}' AND (NOT FO_COMMENT LIKE '현금%' OR FO_COMMENT IS NULL)
     ) AS FO
-    JOIN CHRIST_CODE AS CD
+    LEFT JOIN CHRIST_CODE AS CD
     ON FO.FO_ACCOUNT = CD.CD_SEQ
     """
     query_result = send_query(database, query_str)
